@@ -1,0 +1,46 @@
+<mujoco model="tu_tisch_verstellbar">
+    <compiler convexhull="true" angle="radian" meshdir="environment_parts/" texturedir = "environment_parts/TU_table_nice/texture"/>
+    <statistic extent="0.3" center="0.3 0 0" meansize=".03"/>
+    <default>
+      <default class="visual_table">
+        <geom group="0" contype="0" conaffinity="0"/>
+      </default>
+        </default>
+    <asset>
+	<texture name="texplane" type="2d" file="floor_texture.png"/>
+        <texture name="metal" type="cube" builtin="flat" width="512" height="512" rgb1="0.7 0.7 0.7" rgb2="0.6 0.6 0.6"/>
+        <texture name="black" type="cube" builtin="flat" width="512" height="512" rgb1="0.1 0.1 0.1" rgb2="0.1 0.1 0.1"/>
+        <material name="metal_mat" texture="metal" texrepeat="1 1" texuniform="true" shininess="1"/>
+        <material name="black_mat" texture="black" texrepeat="1 1" texuniform="true"/>
+	<texture name="skybox" type="skybox" gridsize="3 4" gridlayout=".U..LFRB.D.." file="stormy.png" />
+		
+	<material name="matplane" emission="1" texture="texplane" texrepeat="10 10" />
+    </asset>
+  <worldbody>
+
+		<geom name="ground" type="plane" size="10 10 1" pos="0 0 0" quat="1 0 0 0" material="matplane" condim="3" solimp="0.99 0.99 0.001" solref="0.0001 1"/> 
+			
+        	<body name="tu_tisch_center_ground" pos="0 0 0.0">
+        	<body name="tu_tisch_center_table" pos="0 0 0.77">
+                <site name="gripping_point" pos="0.2 0 0.1" quat="0 -1 0 0"/>
+                <site name="table_mount1" pos="0 0 0"/>
+                <site name="table_mount2" pos="0 -0.4 0"/>
+                <site name="table_mount_kinova" pos="0 -0.4 0.02"/>
+                  <inertial pos="0.0 0.0 0.0"  mass="1.0" diaginertia="0.0 0.0 0.0"/>
+                <!--geom name="table_collision" contype="1" conaffinity="1" type="box" size="0.68 0.5 0.385" pos="0 0 -0.385" material="metal_mat" group="3"/-->
+
+                <geom name="tabletop_visual" type="box" contype="0" conaffinity="0" pos="0 0 -0.02" size="0.65 0.48 0.02" material="metal_mat" class="visual_table"/>
+                <geom name="tabletop_collision" type="box" contype="1" conaffinity="1" pos="0 0 -0.04" size="0.65 0.48 0.04"  group="3"/>
+                <!-- Visual geometry for legs -->
+                <geom name="table_leg1" type="box" contype="0" conaffinity="0" pos="0.63 0.46 -0.385" size="0.02 0.02 0.385" material="black_mat" class="visual_table"/>
+                <geom name="table_leg1_collision" type="box" contype="1" conaffinity="1" pos="0.63 0.46 -0.385" size="0.04 0.04 0.385" group="3"/>
+                <geom name="table_leg2" type="box" contype="0" conaffinity="0" pos="-0.63 0.46 -0.385" size="0.02 0.02 0.385" material="black_mat" class="visual_table"/>
+                <geom name="table_leg2_collision" type="box" contype="1" conaffinity="1" pos="-0.63 0.46 -0.385" size="0.04 0.04 0.385" group="3"/>
+                <geom name="table_leg3" type="box" contype="0" conaffinity="0" pos="0.63 -0.46 -0.385" size="0.02 0.02 0.385" material="black_mat" class="visual_table"/>
+                <geom name="table_leg3_collision" type="box" contype="1" conaffinity="1" pos="0.63 -0.46 -0.385" size="0.04 0.04 0.385" group="3"/>
+                <geom name="table_leg4" type="box" contype="0" conaffinity="0" pos="-0.63 -0.46 -0.385" size="0.02 0.02 0.385" material="black_mat" class="visual_table"/>
+                <geom name="table_leg4_collision" type="box" contype="1" conaffinity="1" pos="-0.63 -0.46 -0.385" size="0.04 0.04 0.385" group="3"/>
+            </body>
+        </body>
+  </worldbody>
+</mujoco>

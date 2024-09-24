@@ -1,0 +1,117 @@
+<mujoco model="iiwa">
+
+    <!-- <compiler meshdir="environments/" texturedir="asset"/> -->
+    <compiler angle="radian" meshdir="environment_parts/" autolimits="true"/>
+
+
+    <!-- <keyframe>
+        <key time="0" qpos="0 0 0 0 0 0 0" />
+    </keyframe> -->
+
+
+
+    <!-- Physical limits of the actuator. -->
+    <!-- Values taken from kuka_lbr_iiwa_brochure_en.pdf (see website) -->
+    <actuator>
+        <motor ctrllimited="true" ctrlrange="-176.0 176.0" joint="joint_1" name="torq_j1"/>
+        <motor ctrllimited="true" ctrlrange="-176.0 176.0" joint="joint_2" name="torq_j2"/>
+        <motor ctrllimited="true" ctrlrange="-110.0 110.0" joint="joint_3" name="torq_j3"/>
+        <motor ctrllimited="true" ctrlrange="-110.0 110.0" joint="joint_4" name="torq_j4"/>
+        <motor ctrllimited="true" ctrlrange="-110.0 110.0" joint="joint_5" name="torq_j5"/>
+        <motor ctrllimited="true" ctrlrange="-40.0 40.0" joint="joint_6" name="torq_j6"/>
+        <motor ctrllimited="true" ctrlrange="-40.0 40.0" joint="joint_7" name="torq_j7"/>
+    </actuator>
+      <!--actuator>
+    <position name="pos_j1_right" joint="joint_1" ctrllimited="true" ctrlrange="-2.9670597283903604 2.9670597283903604" kp="1000" />
+    <position name="pos_j2_right" joint="joint_2" ctrllimited="true" ctrlrange="-2.0943951023931953 2.0943951023931953" kp="1000"/>
+    <position name="pos_j3_right" joint="joint_3" ctrllimited="true" ctrlrange="-2.9670597283903604 2.9670597283903604" kp="1000"/>
+    <position name="pos_j4_right" joint="joint_4" ctrllimited="true" ctrlrange="-2.0943951023931953 2.0943951023931953" kp="100"/>
+    <position name="pos_j5_right" joint="joint_5" ctrllimited="true" ctrlrange="-2.9670597283903604 2.9670597283903604" kp="100"/>
+    <position name="pos_j6_right" joint="joint_6" ctrllimited="true" ctrlrange="-2.0943951023931953 2.0943951023931953" kp="100"/>
+    <position name="pos_j7_right" joint="joint_7" ctrllimited="true" ctrlrange="-3.0543261909900767 3.0543261909900767" kp="100"/>
+  </actuator-->
+    <asset>
+        <mesh name="link_0" file="iiwa_arc/assets/meshes/base_link.stl" />
+        <mesh name="link_1" file="iiwa_arc/assets/meshes/link_1.stl" />
+        <mesh name="link_2" file="iiwa_arc/assets/meshes/link_2.stl" />
+        <mesh name="link_3" file="iiwa_arc/assets/meshes/link_3.stl" />
+        <mesh name="link_4" file="iiwa_arc/assets/meshes/link_4.stl" />
+        <mesh name="link_5" file="iiwa_arc/assets/meshes/link_5.stl" />
+        <mesh name="link_6" file="iiwa_arc/assets/meshes/link_6.stl" />
+        <mesh name="link_7" file="iiwa_arc/assets/meshes/link_7.stl" />
+
+         <!--texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="512"/-->
+
+        <!-- <texture name="texplane" type="2d" builtin="checker" rgb1=".2 .3 .4" rgb2=".1 0.15 0.2" 
+      width="512" height="512" mark="cross" markrgb=".8 .8 .8"/> -->
+      <!-- <material name="matplane" reflectance="0.3" texture="texplane" texrepeat="1 1" texuniform="true"/> -->
+    </asset>
+    <worldbody>
+
+        <body name="base" pos="0 0 0">
+            <camera mode="fixed" name="robotview" pos="1.0 0 0.4" quat="0.653 0.271 0.271 0.653"/>
+            <inertial diaginertia="0 0 0" mass="0" pos="0 0 0"/>
+            <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_0" rgba="0.4 0.4 0.4 1"/>
+            <geom name="col_sockel" pos="-0.01 0 0.10" group="3" type="sphere" size="0.12" contype="0" conaffinity="0" density="0" rgba="1 0 0 1"/>
+
+            <body name="iiwa_link_1" pos="0 0 0.1575">
+                <inertial pos="0 -0.01439 0.102503" quat="1 0 0 0" mass="6.495" diaginertia="0.0690761441316632 0.0711085586914514 0.0200625854402119"/>
+                <joint name="joint_1" pos="0 0 0" axis="0 0 1" limited="true" range="-2.9670597283903604 2.9670597283903604" />
+                <geom pos="0 0 -0.005" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_1" rgba="0.4 0.4 0.4 1"/>
+                <!-- Red collision sphere for link_1 -->
+                <geom  name="col_joint1" quat="0 0 0 1" type="capsule" group="3" fromto="0 0 0 0 -0.05 0.2025" size="0.075" contype="1" conaffinity="1" density="0" rgba="0.4 0.4 0.4 1"/>
+
+                <body name="iiwa_link_2" pos="0 0 0.2025" quat="0 0 0.707107 0.707107">
+                    <inertial pos="1.2e-05 0.06472 0.004804" quat="1 0 0 0" mass="8.807" diaginertia="0.0824701683534692 0.0164110968055191 0.0873510892661361"/>
+                    <joint name="joint_2" pos="0 0 0" axis="0 0 1" limited="true" range="-2.0943951023931953 2.0943951023931953"/>
+                    <geom pos="0 0 -0.013" quat="0 0 0 1" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_2" rgba="1 0.423529 0.0392157 1"/>
+                    <!-- Red collision capsule for link_2 -->
+                    <geom  name="col_joint2" quat="0 0 0 1" type="capsule" group="3" fromto="0.0 0 0.0513 0 0.2375 0" size="0.075" contype="1" conaffinity="1" density="0" rgba="1 0.423529 0.0392157 1"/>
+
+                    <body name="iiwa_link_3" pos="0 0.2375 0" quat="0 0 0.707107 0.707107">
+                        <inertial pos="-0.000208 0.01601 0.087283" quat="1 0 0 0" mass="2.8" diaginertia="0.0230152941318817 0.0228661554143474 0.0454482283748983"/>
+                        <joint name="joint_3" pos="0 0 0" axis="0 0 1" limited="true" range="-2.9670597283903604 2.9670597283903604"/>
+                        <geom pos="0 0 -0.005" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_3" rgba="0.4 0.4 0.4 1"/>
+                        <!-- Red collision sphere for link_3 -->
+                        <geom name="col_joint3" quat="0 0 0 1" type="capsule" group="3" fromto="0 0 0 0. 0.05 0.1825" size="0.07" contype="1" conaffinity="1" density="0" rgba="0.4 0.4 0.4 1"/>
+
+
+                        <body name="iiwa_link_4" pos="0 0 0.1825" quat="0.707107 0.707107 0 0">
+                            <inertial pos="-0.000203 0.098639 0.011478" quat="1 0 0 0" mass="5.283" diaginertia="0.0472789668341968 0.00964726804146909 0.0466529007761679"/>
+                            <joint name="joint_4" pos="0 0 0" axis="0 0 1" limited="true" range="-2.0943951023931953 2.0943951023931953"/>
+                            <geom pos="0 0 -0.011" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_4" rgba="1 0.423529 0.0392157 1"/>
+                            <!-- Red collision capsule for link_4 -->
+                            <geom  name="col_joint4" quat="0 0 0 1" type="capsule" group="3" fromto="0 0 0.04 0. 0.2175 0" size="0.07" contype="1" conaffinity="1" density="0" rgba="1 0.423529 0.0392157 1"/>
+
+                            <body name="iiwa_link_5" pos="0 0.2175 0" quat="0 0 0.707107 0.707107">
+                                <inertial pos="5.7e-05 0.014468 0.062938" mass="1.889" diaginertia="0.0138359953358589 0.0116859337751969 0.00571863785412578"/>
+                                <joint name="joint_5" pos="0 0 0" axis="0 0 1" limited="true" range="-2.9670597283903604 2.9670597283903604"/>
+                                <geom pos="0 0 -0.005" quat="0 0 0 1" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_5" rgba="0.4 0.4 0.4 1"/>
+                                <!-- Red collision sphere for link_5 -->
+                                 <geom  name="col_joint5" quat="0 0 0 1" type="capsule" group="3" fromto="0 0 0 0 0.03 0.1825" size="0.07" contype="1" conaffinity="1" density="0" rgba="0.4 0.4 0.4 1"/>
+
+
+                                <body name="iiwa_link_6" pos="0 0 0.1825" quat="0.707107 0.707107 0 0">
+                                    <inertial pos="0.000363 0.016982 -0.019731" quat="1 0 0 0" mass="2.32" diaginertia="0.00732758787216765 0.00477633755783711 0.00606797638550296"/>
+                                    <joint name="joint_6" pos="0 0 0" axis="0 0 1" limited="true" range="-2.0943951023931953 2.0943951023931953"/>
+                                    <geom pos="0 0 -0.061" quat="0 0 0 1" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_6" rgba="1 0.423529 0.0392157 1"/>
+                                    <!-- Red collision capsule for link_6 -->
+                                    <geom name="col_joint67" quat="0 0 0 1" type="capsule" group="3" fromto="0 0 0 0 0.081 0." size="0.06" contype="1" conaffinity="1" density="0" rgba="1 0.423529 0.0392157 1"/>
+
+                                    <body name="iiwa_link_7" pos="0 0.081 0" quat="0 0 0.707107 0.707107">
+                                        <inertial pos="0.001904 -9.3e-05 0.018862" quat="1 0 0 0" mass="0.863" diaginertia="0.000884 0.000888 0.001105"/>
+                                        <joint name="joint_7" pos="0 0 0" axis="0 0 1" limited="true" range="-3.0543261909900767 3.0543261909900767"/>
+                                        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="link_7" rgba="0.4 0.4 0.4 1"/>
+                                        <!-- Red collision sphere for link_7 -->
+
+                                        <site name="gripper_attachment" pos="0 0 0.071" size="0.01" rgba="1 0 0 1" group="0"/>
+                                    </body>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+        </body>
+    </worldbody>
+</mujoco>

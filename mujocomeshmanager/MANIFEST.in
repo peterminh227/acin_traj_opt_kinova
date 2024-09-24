@@ -1,0 +1,3 @@
+include README.md
+include LICENSE
+recursive-include MujocoEnvCreator/environment_parts *.xml *.stl *.obj *.dae *.mtl *.png *.jpg

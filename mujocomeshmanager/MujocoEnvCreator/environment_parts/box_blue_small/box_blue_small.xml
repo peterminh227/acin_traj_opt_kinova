@@ -1,0 +1,21 @@
+<mujoco model="box_blue_large">
+    <compiler angle="radian" meshdir="environment_parts/" />
+    <asset>
+        <!-- Add a blue material with plastic-like properties -->
+        <material name="blue_plastic2" rgba="0 0 1 1" shininess="0.8" specular="1"/>
+    </asset>
+    <worldbody>
+        <!-- Uncomment and adjust the light if needed -->
+        <!-- <light pos="0 0 1.5" dir="0 0 -1" directional="true"/> -->
+        <body name="Kiste" pos="0 0 0">
+            <site name="gripping_point" pos="0.135 0.0875 0.475" quat="0 -1 0 0"/>
+            <site name="grasp_pop" pos="0 0 0" size="0.01" rgba="1 0 0 1" group="0"/>
+            <!-- Adjust the geometries to reflect the dimensions and apply the blue plastic material -->
+            <geom pos="0 0 0.00475" size="0.0675 0.0875 0.00475" type="box" condim="3" name="Kiste_bottom" material="blue_plastic2"/>
+            <geom pos="0.0675 0 0.0475" size="0.0025 0.0875 0.0475" type="box" condim="3" name="Kiste_wall1" material="blue_plastic2"/>
+            <geom pos="-0.0675 0 0.0475" size="0.0025 0.0875 0.0475" type="box" condim="3" name="Kiste_wall2" material="blue_plastic2"/>
+            <geom pos="0 0.0875 0.0475" size="0.0675 0.0025 0.0475" type="box" condim="3" name="Kiste_wall3" material="blue_plastic2"/>
+            <geom pos="0 -0.0875 0.0475" size="0.0675 0.0025 0.0475" type="box" condim="3" name="Kiste_wall4" material="blue_plastic2"/>
+        </body>
+    </worldbody>
+</mujoco>

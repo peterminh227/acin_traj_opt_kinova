@@ -1,0 +1,18 @@
+<mujoco model="hammer_model">
+    <compiler angle="radian" meshdir="environment_parts/" />
+
+      <!-- Define the assets -->
+    <asset>
+         <texture name="hammer_png" file="environment_parts/hammer/assets_hammer/hammer.png" type="2d"/>
+        <material name="hammer_mat" texture="hammer_png" specular="1" shininess="1"/>
+        <mesh name="hammer_mesh" file="hammer/assets_hammer/Hammer.obj" scale="0.02 0.02 0.02"/>
+    </asset>
+
+    <!-- Define the world body -->
+    <worldbody>
+        <!-- Load the hammer mesh and place it at the origin -->
+        <body name="hammer" pos="0 0 0.13">
+            <geom type="mesh" mesh="hammer_mesh" material="hammer_mat"/>
+        </body>
+    </worldbody>
+</mujoco>

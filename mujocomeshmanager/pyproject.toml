@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "MujocoMeshManager"
+version = "0.9.0"
+description = "Includes Assets and utility Classes for creating mujoco environments of ACIN lab"
+authors = [
+  { name = "Alexander Wachter", email = "alexander.wachter@tuwien.ac.at" }
+]
+readme = "README.md"
+dependencies = [
+  "configargparse>=1.7",
+  "dm-control>=1.0.20",
+  "colorama>=0.4.6",
+  "numpy<2.0.0"
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=6.2.4"]
+
+[tool.setuptools]
+packages = ["MujocoEnvCreator", "MujocoEnvCreator.utils"]
+
+[tool.setuptools.package-data]
+"MujocoEnvCreator" = [
+    "environment_parts/**/*.xml",
+    "environment_parts/**/*.stl",
+    "environment_parts/**/*.obj",
+    "environment_parts/**/*.dae",
+    "environment_parts/**/*.mtl",
+    "environment_parts/**/*.png",
+    "environment_parts/**/*.jpg"
+]

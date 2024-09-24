@@ -1,0 +1,7 @@
+<mujoco model="handover_point">
+  <worldbody>
+       <body name="handover_point_body" pos="0 0 0">
+             <site name="gripping_point" type="sphere" pos="0 0 0" size="0.1" rgba="1 0 0 0.5"/>
+        </body>
+  </worldbody>
+</mujoco>

@@ -1,0 +1,39 @@
+<mujoco model="iros_competition_box">
+    <compiler angle="radian" meshdir="environment_parts/" convexhull="false"/>
+          <!-- Define the assets -->
+    <asset>
+        <mesh name="box" file="iros_competition_box/assets/box_v4.obj" />
+
+        <mesh name="col1" file="iros_competition_box/assets/col/col1.obj" />
+        <mesh name="col2" file="iros_competition_box/assets/col/col2.obj" />
+        <mesh name="col3" file="iros_competition_box/assets/col/col3.obj" />
+        <mesh name="col5" file="iros_competition_box/assets/col/col5.obj" />
+        <mesh name="col6" file="iros_competition_box/assets/col/col6.obj" />
+        <mesh name="col7" file="iros_competition_box/assets/col/col7.obj" />
+        <mesh name="col8" file="iros_competition_box/assets/col/col8.obj" />
+        <mesh name="col10" file="iros_competition_box/assets/col/col10.obj" />
+        <mesh name="col11" file="iros_competition_box/assets/col/col11.obj" />
+        <mesh name="col12" file="iros_competition_box/assets/col/col12.obj" />
+
+    </asset>
+
+    <!-- Define the world body -->
+    <worldbody>
+        <!-- Load the hammer mesh and place it at the origin -->
+        <body name="iros_box" pos="0 0 0">
+            <geom name="iros_box" type="mesh" mesh="box" group="0" contype="0" conaffinity="0"/>
+
+            <geom name="col1" type="mesh" mesh="col1" group="3" contype="1" conaffinity="1"/>
+            <geom name="col2" type="mesh" mesh="col2" group="3" contype="1" conaffinity="1"/>
+            <geom name="col3" type="mesh" mesh="col3" group="3" contype="1" conaffinity="1"/>
+            <geom name="col5" type="mesh" mesh="col5" group="3" contype="1" conaffinity="1"/>
+            <geom name="col6" type="mesh" mesh="col6" group="3" contype="1" conaffinity="1"/>
+            <geom name="col7" type="mesh" mesh="col7" group="3" contype="1" conaffinity="1"/>
+            <geom name="col8" type="mesh" mesh="col8" group="3" contype="1" conaffinity="1"/>
+            <geom name="col10" type="mesh" mesh="col10" group="3" contype="1" conaffinity="1"/>
+            <geom name="col11" type="mesh" mesh="col11" group="3" contype="1" conaffinity="1"/>
+            <geom name="col12" type="mesh" mesh="col12" group="3" contype="1" conaffinity="1"/>
+
+        </body>
+    </worldbody>
+</mujoco>

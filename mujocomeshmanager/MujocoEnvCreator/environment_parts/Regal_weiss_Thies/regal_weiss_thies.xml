@@ -1,0 +1,33 @@
+<mujoco model="regal_weiss_Thies">
+    <compiler convexhull="true" angle="radian" meshdir="environments/" />
+    <statistic extent="0.3" center="0.3 0 0" meansize=".03"/>
+      <default class="shelf_white">
+        <geom group="1" contype="1" conaffinity="1" condim="3"/>
+      </default>
+    <worldbody>
+        <!--light pos="0 0 1.5" dir="0 0 -1" directional="true"/-->
+         <body name="shelf" pos="0 0 0">
+            <!-- Left Wall -->
+            <geom name="left_wall" group="1" contype="1" conaffinity="1" condim="3" type="box" size="0.01 0.14 0.53" pos="-0.39 0 0.53" rgba="1 1 1 1"/>
+
+            <!-- Right Wall -->
+            <geom name="right_wall" group="1" contype="1" conaffinity="1" condim="3" type="box" size="0.01 0.14 0.53" pos="0.39 0 0.53" rgba="1 1 1 1"/>
+
+            <!-- Bottom Shelf -->
+            <geom name="bottom_shelf" group="1" contype="1" conaffinity="1" condim="3" type="box" size="0.4 0.14 0.01" pos="0 0 0.10" rgba="1 1 1 1"/>
+
+            <!-- Second Shelf -->
+            <geom name="second_shelf" group="1" contype="1" conaffinity="1" condim="3" type="box" size="0.4 0.14 0.01" pos="0 0 0.55" rgba="1 1 1 1"/>
+
+            <!-- Third Shelf -->
+            <geom name="third_shelf" group="1" contype="1" conaffinity="1" condim="3" type="box" size="0.4 0.14 0.01" pos="0 0 0.80" rgba="1 1 1 1"/>
+
+            <!-- Top Shelf -->
+            <geom name="top_shelf" group="1" contype="1" conaffinity="1" condim="3" type="box" size="0.4 0.14 0.01" pos="0 0 1.05" rgba="1 1 1 1"/>
+             <site name="gripping_point" type="sphere" pos="0 0 0.915" quat="0.7071068 0.7071068 0 0"/>
+
+            <!-- Back Wall -->
+            <geom name="back_wall" type="box" size="0.4 0.01 0.53" pos="0 -0.14 0.53" rgba="1 1 1 1"/>
+        </body>
+    </worldbody>
+</mujoco>

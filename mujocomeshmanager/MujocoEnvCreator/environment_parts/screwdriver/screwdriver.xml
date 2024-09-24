@@ -1,0 +1,18 @@
+<mujoco model="screwdriver">
+    <compiler angle="radian" meshdir="environment_parts/" />
+
+      <!-- Define the assets -->
+    <asset>
+         <texture name="screwdriver_png" file="environment_parts/screwdriver/assets_screwdriver/screwdriver.png" type="2d"/>
+        <material name="screwdriver_mat" texture="screwdriver_png" specular="1" shininess="1"/>
+        <mesh name="screwdriver_mesh" file="screwdriver/assets_screwdriver/screwdriver.obj" scale="0.015 0.015 0.015"/>
+    </asset>
+
+    <!-- Define the world body -->
+    <worldbody>
+        <!-- Load the hammer mesh and place it at the origin -->
+        <body name="screwdriver" pos="0 0 -0.05">
+            <geom name="screwdriver" type="mesh" mesh="screwdriver_mesh" material="screwdriver_mat"/>
+        </body>
+    </worldbody>
+</mujoco>

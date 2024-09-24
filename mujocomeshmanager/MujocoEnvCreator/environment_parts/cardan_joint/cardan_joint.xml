@@ -1,0 +1,54 @@
+<mujoco model="cardan_joint">
+  <compiler convexhull="true" angle="radian" meshdir="environment_parts/" />
+
+  <asset>
+    <mesh name="cj_cam_mount" file="cardan_joint/assets/cj_cam_mount_V2.obj" />
+    <mesh name="cj_middle" file="cardan_joint/assets/cj_middle.obj" />
+    <mesh name="cj_bot" file="cardan_joint/assets/cj_asm_half.obj" />
+    <mesh name="cj_cam_mount_vis" file="cardan_joint/assets/cj_cam_mount_V2_vis.obj" />
+    <mesh name="cj_middle_vis" file="cardan_joint/assets/cj_middle_vis.obj" />
+    <mesh name="cj_bot_vis" file="cardan_joint/assets/cj_asm_half_vis.obj" />
+  </asset>
+
+  <default>
+    <default class="visual">
+      <geom type="mesh" contype="0" conaffinity="0" group="2"/>
+    </default>
+    <default class="collision">
+      <geom type="mesh" group="3"/>
+    </default>
+  </default>
+
+<worldbody>
+  <body name="cj_top" pos="0 0 0" quat="0.7071 0 0 0.7071">
+    <inertial pos="0.0135 -0.0 0.02238" quat="1 0 0 0" mass="0.5" diaginertia="0.000124 0.000378 0.000425"/>
+    <geom class="visual" contype="0" conaffinity="0" group="2" mesh="cj_cam_mount_vis" quat="0.7071 0 0 0.7071"/>
+    <geom class="collision" contype="0" mesh="cj_cam_mount" quat="0.7071 0 0 0.7071"/>
+    <site name="imu1_site" pos="-0.0124 -0.0138 0.0428" quat="0 1 0 0" type="sphere" size="0.002" rgba="1 0 0 1"/>
+    <!-- realsense camera -->
+    <camera mode="fixed" name="eye_in_hand" pos="0.075 0 0.02" quat="0 0.7071 0.7071 0" fovy="75"/>
+    <body name="cj_middle" pos="0 0 0.07077" quat="0.7071 0 0 -0.7071">
+      <inertial pos="0 0 0" quat="1 0 0 0" mass="0.016" diaginertia="0.000001 0.000001 0.000001"/>
+      <joint name="joint_cj1" pos="0 0 0" axis="1 0 0" limited="true" range="-0.785 0.785" damping="0.1" />
+      <geom class="visual" contype="0" conaffinity="0" group="2" mesh="cj_middle_vis" quat="0.7071 0.7071 0 0"/>
+      <geom class="collision" contype="0" conaffinity="0" mesh="cj_middle" quat="0.7071 0.7071 0 0"/>
+      <body name="cj_bot" pos="0 0 0.028" quat="1 0 0 0">
+        <inertial pos="0.0 0.0 0.05" quat="1 0 0 0" mass="1" diaginertia="0.0008 0.0008 0.001"/>
+        <joint name="joint_cj2" pos="0 0 -0.028" axis="0 1 0" limited="true" range="-0.785 0.785" damping="0.1" />
+        <geom class="visual" contype="0" conaffinity="0" group="2" mesh="cj_bot_vis" quat="0 1 0 0"/>
+        <geom class="collision" contype="0" conaffinity="0" mesh="cj_bot" quat="0 1 0 0"/>
+        <site name="imu2_site" pos="0.0138 0.0124 0.0" quat="0.7071 0 0 -0.7071" type="sphere" size="0.002" rgba="0 1 0 1"/>
+        <site name="tool_attach" pos="0 0 0.01" quat="1 0 0 0" type="sphere" size="0.004" rgba="0 0 1 1"/>
+      </body>
+    </body>
+  </body>
+</worldbody>
+
+<sensor>
+  <accelerometer name="acc1" site="imu1_site"/>
+  <gyro name="gyro1" site="imu1_site"/>
+  <accelerometer name="acc2" site="imu2_site"/>
+  <gyro name="gyro2" site="imu2_site"/>
+</sensor>
+
+</mujoco>

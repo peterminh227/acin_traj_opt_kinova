@@ -1,0 +1,21 @@
+<mujoco model="scissor">
+    <compiler convexhull="true" angle="radian" meshdir="environment_parts/" />
+    <default>
+      <default class="collision_box">
+        <geom group="3" contype="1" conaffinity="1"/>
+      </default>
+      <default class="visual_box">
+        <geom group="0" contype="0" conaffinity="0"/>
+      </default>
+        </default>
+    <asset>
+         <mesh name="scissor" file="power_drill/assets_scissor/scissor.stl"/>
+    </asset>
+  <worldbody>
+    <!--light pos="0 0 1.5" dir="0 0 -1" directional="true"/-->
+    <body name="scissor" pos="0 0 0">
+        <site name="gripping_point" pos="0.3 0.25 0.5" quat="0 -1 0 0"/>
+        <geom pos="0 0 0" type="mesh" rgba="0.2 0.2 0.2 1" name="scissor" mesh="scissor"/>
+    </body>
+  </worldbody>
+</mujoco>

@@ -1,0 +1,16 @@
+<mujoco model="human">
+    <compiler angle="radian" meshdir="environment_parts/" />
+
+      <!-- Define the assets -->
+    <asset>
+        <mesh name="human" file="human/assets_human/human_27.stl"/>
+    </asset>
+
+    <!-- Define the world body -->
+    <worldbody>
+        <!-- Load the hammer mesh and place it at the origin -->
+        <body name="human" pos="0 0 0">
+            <geom name="human" type="mesh" mesh="human"/>
+        </body>
+    </worldbody>
+</mujoco>

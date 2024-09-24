@@ -1,0 +1,18 @@
+<mujoco model="lab">
+    <compiler convexhull="true" angle="radian" meshdir="environment_parts/" />
+    <option integrator="implicitfast"/>
+        <option timestep="0.001" >
+    </option>
+    <statistic extent="0.3" center="0.3 0 0" meansize=".03"/>
+
+    <asset>
+        <!-- <texture name="floor_tex" file="environment_parts/laboratory/assets_labratory/ugly_lab_floor.png" type="2d"/> -->
+        <!-- <material name="MatGnd" texture="floor_tex" texrepeat="8 8" specular="0.1" shininess="0.1" reflectance="0.1" rgba="1 1 1 1"/> -->
+    </asset>
+
+    <worldbody>
+        <light pos="0 0 1.5" dir="0 0 -1" directional="true"/>
+        <geom name="ground" type="plane" size="0 0 1" pos="0 0 0" quat="1 0 0 0"   contype="1" conaffinity="1" group="0" />
+        <site name="ground_attach" pos="0 0 0" size="0.01" rgba="1 0 0 1" group="0"/>
+    </worldbody>
+</mujoco>

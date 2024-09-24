@@ -1,0 +1,29 @@
+<mujoco model="profactor_gripper">
+    <compiler convexhull="true" angle="radian" meshdir="environments/" />
+    <default class="2f85">
+        <default class="visual3">
+            <geom type="mesh" contype="0" conaffinity="0" group="2" material="gray2"/>
+        </default>
+        <default class="collision3">
+            <geom type="mesh" group="3" rgba="1 1 0.1 1" condim="3"/>
+        </default>
+    </default>
+
+
+    <asset>
+        <material name="black2" rgba="0.149 0.149 0.149 1"/>
+        <material name="wood2" rgba="0.56 0.37 0.29 1"/>
+        <material name="gray2" rgba="0.4 0.4 0.4 1"/>
+        <mesh name="gripper_profactor" file="Profactor_gripper/assets_gripper/Gripper_ASM.stl" scale="0.001 0.001 0.001"/>
+    </asset>
+  <worldbody>
+        <!--light pos="0 0 1.5" dir="0 0 -1" directional="true"/-->
+        <!--geom name="ground" type="plane" size="0 0 1" pos="0 0 0" quat="1 0 0 0"  contype="0" group="0" /-->
+        <body name="gripper_mount" pos="0 0 0.0">
+              <inertial pos="0.0 0.0 0.0"  mass="1.0" diaginertia="0.0 0.0 0.0"/>
+              <geom class="visual3" mesh="gripper_profactor" material="black2"/>
+              <geom class="collision3" mesh="gripper_profactor" material="black2"/>
+                <site name="gripping_point" pos="0 0 0.11"/>
+              </body>
+  </worldbody>
+</mujoco>
