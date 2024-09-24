@@ -44,6 +44,4 @@ The following trajectory optimization methods are implemented and compared in th
 
 To set up the project, follow these steps:
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/kinova-trajectory-optimization.git
+
