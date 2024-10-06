@@ -41,7 +41,7 @@ bounds_right = {
 }
 
 # Number of configurations to generate
-num_configs = 100_000
+num_configs = 1
 
 # Generate random configurations within the bounds
 qpos_collision_backboard = np.random.uniform(bounds_right['lower'], bounds_right['upper'], (num_configs, len(bounds_right['lower']))).tolist()
@@ -69,50 +69,70 @@ qpos_collision_backboard = np.random.uniform(bounds_right['lower'], bounds_right
 
 #TEST torch collision
 
-#device = 'cuda'
-#q_pos = torch.tensor(qpos_collision_backboard).float().to(device).reshape(-1,7)
-#H0_base = np.identity(4)
-#H0_base[0:3,3] = np.array([0,0,0.25])
-#robot_offset_to_world = torch.from_numpy(H0_base).unsqueeze(0).to(device).expand(len(q_pos),4,4).float()
+device = 'cuda'
+q_pos = torch.tensor(qpos_collision_backboard).float().to(device).reshape(-1,7)
+H0_base = np.identity(4)
+H0_base[0:3,3] = np.array([0,0,0.25])
+robot_offset_to_world = torch.from_numpy(H0_base).unsqueeze(0).to(device).expand(len(q_pos),4,4).float()
 #
-#kuka = KUKAiiwaLayer(device).to(device)
-#bp_sdf  = BPSDF(n_func=24,domain_min=-1,domain_max=1,robot=kuka,device=device)
-#model = torch.load(f'compute_roboSDF/BP_iiwa_24.pt')
-#sensor_map = get_snesor_grid(env)
+kuka = KUKAiiwaLayer(device).to(device)
+bp_sdf  = BPSDF(n_func=24,domain_min=-1,domain_max=1,robot=kuka,device=device)
+model = torch.load(f'compute_roboSDF/BP_iiwa_24.pt')
+sensor_map = get_snesor_grid(env)
 #sensor_map = sensor_map[:5]
-#batch_size = 5
+batch_size = len(sensor_map)
+#batch_size = 2000
 #
 #
-#total_sum = np.zeros(len(qpos_collision_backboard))  # Initialize the total sum
+total_sum = np.zeros(len(qpos_collision_backboard))  # Initialize the total sum
+sensor_map_torch = torch.from_numpy(sensor_map).to(device).float()
+
+import time
+start_time = time.time()
+sdf,ana_grad,idx = bp_sdf.get_whole_body_sdf_batch_mod(
+    sensor_map_torch,
+    robot_offset_to_world,
+    q_pos,
+    model,
+    use_derivative=False,
+    used_links=[0, 1, 2, 3, 4, 5, 6, 7]
+)
+duration = time.time() -start_time
+print(f"SDF computation processed in {duration:.4f} seconds")
+
+sdf_cpu = sdf.cpu().numpy()
+minimum_values = sdf_cpu.min(axis=1)
+modified_values = np.where(minimum_values > 0, 0.0, minimum_values)
 
 
-#for i in range(0, len(sensor_map), batch_size):
-#    batch = sensor_map[i:i + batch_size]
-#    print(f"Processing batch {i // batch_size + 1}, Shape: {batch.shape}")
-#    sensor_map_torch = torch.from_numpy(batch).to(device).float()
-#
-#    with autocast():  # Enable mixed precision
-#        sdf, ana_grad = bp_sdf.get_whole_body_sdf_batch(
-#            sensor_map_torch,
-#            robot_offset_to_world,
-#            q_pos,
-#            model,
-#            use_derivative=False,
-#            used_links=[0, 1, 2, 3, 4, 5, 6, 7]
-#        )
-#
-#        sdf_cpu = sdf.cpu().numpy()
-#        minimum_values = sdf_cpu.min(axis=1)
-#        modified_values = np.where(minimum_values > 0, 0.0, minimum_values)
-#        total_sum += modified_values
-#
-#    #sdf,ana_grad = bp_sdf.get_whole_body_sdf_batch(sensor_map_torch,robot_offset_to_world,q_pos,model,use_derivative=False,used_links = [0,1,2,3,4,5,6,7])
-#    #sdf_cpu = sdf.cpu().numpy()
-#    del sensor_map_torch, sdf, ana_grad
-#    torch.cuda.empty_cache()
-#print(total_sum)
+'''
+for i in range(0, len(sensor_map), batch_size):
+   batch = sensor_map[i:i + batch_size]
+   print(f"Processing batch {i // batch_size + 1}, Shape: {batch.shape}")
+   sensor_map_torch = torch.from_numpy(batch).to(device).float()
+
+   with autocast():  # Enable mixed precision
+       sdf,ana_grad,idx = bp_sdf.get_whole_body_sdf_batch_new(
+           sensor_map_torch,
+           robot_offset_to_world,
+           q_pos,
+           model,
+           use_derivative=False,
+           used_links=[0, 1, 2, 3, 4, 5, 6, 7]
+       )
+       sdf_cpu = sdf.cpu().numpy()
+       minimum_values = sdf_cpu.min(axis=1)
+       modified_values = np.where(minimum_values > 0, 0.0, minimum_values)
+       total_sum += modified_values
 
 
+   del sensor_map_torch, sdf, ana_grad
+   torch.cuda.empty_cache()
+'''   
+print("Debug value = ",modified_values)
+
+
+exit()
 
 with open('model_mjx/test.xml', 'r') as file:
     xml_content = file.read()

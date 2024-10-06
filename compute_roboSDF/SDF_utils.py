@@ -164,78 +164,136 @@ class BPSDF():
                 trimesh.exchange.export.export_mesh(rec_mesh,
                                                     os.path.join(save_path, f"{save_mesh_name}_{mesh_name}.stl"))
 
-    def get_whole_body_sdf_batch(self, x, pose, theta, model, use_derivative=True, used_links=[0, 1, 2, 3, 4, 5, 6, 7],
-                                 return_index=False):
 
+    def get_whole_body_sdf_batch_mod(self, x, pose, theta, model, use_derivative=True, used_links=[0, 1, 2, 3, 4, 5, 6, 7],
+                                return_index=False, batch_size_points=10000):
         B = len(theta)
-        N = len(x)
+        N = len(x)  # Total number of points
         K = len(used_links)
+
+        # Prepare offsets and scales only once, outside the loop
         offset = torch.cat([model[i]['offset'].unsqueeze(0) for i in used_links], dim=0).to(self.device)
         offset = offset.unsqueeze(0).expand(B, K, 3).reshape(B * K, 3).float()
+        
         scale = torch.tensor([model[i]['scale'] for i in used_links], device=self.device)
         scale = scale.unsqueeze(0).expand(B, K).reshape(B * K).float()
+
+        # Get transformations for each link (out of the loop)
         trans_list = self.robot.get_transformations_each_link(pose, theta)
+        fk_trans = torch.cat([t.unsqueeze(1) for t in trans_list], dim=1)[:, used_links, :, :].reshape(-1, 4, 4)
 
-        fk_trans = torch.cat([t.unsqueeze(1) for t in trans_list], dim=1)[:, used_links, :, :].reshape(-1, 4,
-                                                                                                       4)  # B,K,4,4
-        x_robot_frame_batch = utils_rdf.transform_points(x.float(), torch.linalg.inv(fk_trans).float(),
-                                                         device=self.device)  # B*K,N,3
-        x_robot_frame_batch_scaled = x_robot_frame_batch - offset.unsqueeze(1)
-        x_robot_frame_batch_scaled = x_robot_frame_batch_scaled / scale.unsqueeze(-1).unsqueeze(-1)  # B*K,N,3
+        # Initialize lists to store results (but concatenate at the end)
+        sdf_all = []
+        gradient_all = []
 
-        x_bounded = torch.where(x_robot_frame_batch_scaled > 1.0 - 1e-2, 1.0 - 1e-2, x_robot_frame_batch_scaled)
-        x_bounded = torch.where(x_bounded < -1.0 + 1e-2, -1.0 + 1e-2, x_bounded)
-        res_x = x_robot_frame_batch_scaled - x_bounded
+        '''HELPER
+        '''
+        def print_memory_usage(batch_idx):
+            memory_allocated = torch.cuda.memory_allocated() / (1024 ** 3)  # in GB
+            memory_reserved = torch.cuda.memory_reserved() / (1024 ** 3)  # in GB
+            print(f"Batch {batch_idx}: Allocated Memory: {memory_allocated:.4f} GB, Reserved Memory: {memory_reserved:.4f} GB")
+        
+        with torch.no_grad():
+            # Process points in batches
+            for i in range(0, N, batch_size_points):
+                batch_idx = i // batch_size_points + 1  # Batch index for debug info
 
-        if not use_derivative:
-            phi, _ = self.build_basis_function_from_points(x_bounded.reshape(B * K * N, 3), use_derivative=False)
-            phi = phi.reshape(B, K, N, -1).transpose(0, 1).reshape(K, B * N, -1)  # K,B*N,-1
-            weights_near = torch.cat([model[i]['weights'].unsqueeze(0) for i in used_links], dim=0).to(self.device)
-            # sdf
-            sdf = torch.einsum('ijk,ik->ij', phi, weights_near).reshape(K, B, N).transpose(0, 1).reshape(B * K,
-                                                                                                         N)  # B,K,N
-            sdf = sdf + res_x.norm(dim=-1)
-            sdf = sdf.reshape(B, K, N)
-            sdf = sdf * scale.reshape(B, K).unsqueeze(-1)
-            sdf_value, idx = sdf.min(dim=1)
-            if return_index:
-                return sdf_value, None, idx
-            return sdf_value, None
+                # Handle the final batch properly by slicing up to N
+                x_batch = x[i:min(i + batch_size_points, N)]  # Subset of points
+
+                # Transform points to the robot frame, use efficient in-place operations where possible
+                x_robot_frame_batch = utils_rdf.transform_points(
+                    x_batch.float(), torch.linalg.inv(fk_trans).float(), device=self.device
+                )  # B*K,N,3
+                
+                x_robot_frame_batch -= offset.unsqueeze(1)  # In-place subtraction to save memory
+                x_robot_frame_batch /= scale.unsqueeze(-1).unsqueeze(-1)  # In-place division
+                
+                # Clamp transformed points to [-1 + epsilon, 1 - epsilon] for bounding
+                x_bounded = torch.clamp(x_robot_frame_batch, -1.0 + 1e-2, 1.0 - 1e-2)
+                res_x = x_robot_frame_batch - x_bounded
+                
+                if not use_derivative:
+                    # Compute basis functions without derivative
+                    phi, _ = self.build_basis_function_from_points(
+                        x_bounded.reshape(B * K * x_batch.shape[0], 3), use_derivative=False
+                    )
+                    phi = phi.reshape(B, K, x_batch.shape[0], -1).transpose(0, 1).reshape(K, B * x_batch.shape[0], -1)
+                    
+                    # Concatenate model weights efficiently
+                    weights_near = torch.cat([model[i]['weights'].unsqueeze(0) for i in used_links], dim=0).to(self.device)
+                    
+                    # Efficient SDF computation using torch.einsum
+                    sdf = torch.einsum('ijk,ik->ij', phi, weights_near).reshape(K, B, x_batch.shape[0]).transpose(0, 1).reshape(B * K, x_batch.shape[0])
+                    sdf += res_x.norm(dim=-1)  # Add residuals
+                    sdf = sdf.reshape(B, K, x_batch.shape[0])
+                    sdf *= scale.reshape(B, K).unsqueeze(-1)  # Scale
+                    
+                    sdf_value, idx = sdf.min(dim=1)
+                    sdf_all.append(sdf_value)
+                else:
+                    # Compute basis functions with derivatives
+                    phi, dphi = self.build_basis_function_from_points(
+                        x_bounded.reshape(B * K * x_batch.shape[0], 3), use_derivative=True
+                    )
+                    phi_cat = torch.cat([phi.unsqueeze(-1), dphi], dim=-1)
+                    phi_cat = phi_cat.reshape(B, K, x_batch.shape[0], -1, 4).transpose(0, 1).reshape(K, B * x_batch.shape[0], -1, 4)
+                    
+                    # Concatenate model weights
+                    weights_near = torch.cat([model[i]['weights'].unsqueeze(0) for i in used_links], dim=0).to(self.device)
+
+                    # Efficient SDF and gradient computation using torch.einsum
+                    output = torch.einsum('ijkl,ik->ijl', phi_cat, weights_near).reshape(K, B, x_batch.shape[0], 4).transpose(0, 1).reshape(
+                        B * K, x_batch.shape[0], 4)
+                    sdf = output[:, :, 0]
+                    gradient = output[:, :, 1:]
+
+                    # Add residuals and scale
+                    sdf += res_x.norm(dim=-1)
+                    sdf = sdf.reshape(B, K, x_batch.shape[0])
+                    sdf *= scale.reshape(B, K).unsqueeze(-1)
+                    sdf_value, idx = sdf.min(dim=1)
+
+                    sdf_all.append(sdf_value)  # Store SDF values
+
+                    # Normalize and compute gradients in the robot base frame
+                    gradient = res_x + torch.nn.functional.normalize(gradient, dim=-1)
+                    gradient = torch.nn.functional.normalize(gradient, dim=-1).float()
+
+                    # Rotate gradients back to base frame
+                    fk_rotation = fk_trans[:, :3, :3]
+                    gradient_base_frame = torch.einsum('ijk,ikl->ijl', fk_rotation, gradient.transpose(1, 2)).transpose(1, 2).reshape(
+                        B, K, x_batch.shape[0], 3)
+
+                    # Gather gradients for the minimum SDF index
+                    idx_grad = idx.unsqueeze(1).unsqueeze(-1).expand(B, K, x_batch.shape[0], 3)
+                    gradient_value = torch.gather(gradient_base_frame, 1, idx_grad)[:, 0, :, :]
+                    gradient_all.append(gradient_value)
+
+
+                # Print memory usage at the end of each batch
+                print_memory_usage(batch_idx)
+
+                # Delete intermediate tensors to free memory
+                if (use_derivative):
+                    del x_batch, x_robot_frame_batch, x_bounded, res_x, phi, dphi, weights_near, sdf, gradient
+                else:
+                    del x_batch, x_robot_frame_batch, x_bounded, res_x, phi, weights_near, sdf
+                torch.cuda.empty_cache()  # Clear the GPU memory
+                
+        if (return_index==False):
+            idx = None
+        if (use_derivative==False):                
+            gradient_all = None
         else:
-            phi, dphi = self.build_basis_function_from_points(x_bounded.reshape(B * K * N, 3), use_derivative=True)
-            phi_cat = torch.cat([phi.unsqueeze(-1), dphi], dim=-1)
-            phi_cat = phi_cat.reshape(B, K, N, -1, 4).transpose(0, 1).reshape(K, B * N, -1, 4)  # K,B*N,-1,4
+            gradient_all = torch.cat(gradient_all,dim=-2)
 
-            weights_near = torch.cat([model[i]['weights'].unsqueeze(0) for i in used_links], dim=0).to(self.device)
+        sdf_all = torch.cat(sdf_all,dim=-1)
 
-            output = torch.einsum('ijkl,ik->ijl', phi_cat, weights_near).reshape(K, B, N, 4).transpose(0, 1).reshape(
-                B * K, N, 4)
-            sdf = output[:, :, 0]
-            gradient = output[:, :, 1:]
-            # sdf
-            sdf = sdf + res_x.norm(dim=-1)
-            sdf = sdf.reshape(B, K, N)
-            sdf = sdf * (scale.reshape(B, K).unsqueeze(-1))
-            sdf_value, idx = sdf.min(dim=1)
-            # derivative
-            gradient = res_x + torch.nn.functional.normalize(gradient, dim=-1)
-            gradient = torch.nn.functional.normalize(gradient, dim=-1).float()
-            # gradient = gradient.reshape(B,K,N,3)
-            fk_rotation = fk_trans[:, :3, :3]
-            gradient_base_frame = torch.einsum('ijk,ikl->ijl', fk_rotation, gradient.transpose(1, 2)).transpose(1,
-                                                                                                                2).reshape(
-                B, K, N, 3)
-            # norm_gradient_base_frame = torch.linalg.norm(gradient_base_frame,dim=-1)
+        return sdf_all, gradient_all, idx
 
-            # exit()
-            # print(norm_gradient_base_frame)
 
-            idx_grad = idx.unsqueeze(1).unsqueeze(-1).expand(B, K, N, 3)
-            gradient_value = torch.gather(gradient_base_frame, 1, idx_grad)[:, 0, :, :]
-            # gradient_value = None
-            if return_index:
-                return sdf_value, gradient_value, idx
-            return sdf_value, gradient_value
+
 
     def get_whole_body_sdf_with_joints_grad_batch(self, x, pose, theta, model, used_links=[0, 1, 2, 3, 4, 5, 6, 7]):
 
