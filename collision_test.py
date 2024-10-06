@@ -95,7 +95,8 @@ sdf,ana_grad,idx = bp_sdf.get_whole_body_sdf_batch_mod(
     q_pos,
     model,
     use_derivative=False,
-    used_links=[0, 1, 2, 3, 4, 5, 6, 7]
+    used_links=[0, 1, 2, 3, 4, 5, 6, 7],
+    batch_size_points = 20000
 )
 duration = time.time() -start_time
 print(f"SDF computation processed in {duration:.4f} seconds")
