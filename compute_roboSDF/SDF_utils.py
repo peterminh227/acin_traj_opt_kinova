@@ -275,6 +275,7 @@ class BPSDF():
                 print_memory_usage(batch_idx)
 
                 # Delete intermediate tensors to free memory
+                
                 if (use_derivative):
                     del x_batch, x_robot_frame_batch, x_bounded, res_x, phi, dphi, weights_near, sdf, gradient
                 else:

@@ -64,12 +64,12 @@ class Environment_presets(CustomEnvironment):
         gripper = env.get_model_from_xml(xml_file_gripper)
         env.add_model_to_site(gripper, 'tu_tisch_verstellbar/kinova3/gripper_mount')
 
-        return env
+        #return env
 
 
 if __name__ == '__main__':
     env = Environment_presets()
-    env.generate_Tesla()
+    env.generate_iros_env()
     # Compile model
     env.compile_model()
     #env.save_preset('robothub')
