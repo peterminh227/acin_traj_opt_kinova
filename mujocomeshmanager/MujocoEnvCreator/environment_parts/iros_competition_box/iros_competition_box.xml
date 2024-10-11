@@ -1,5 +1,5 @@
 <mujoco model="iros_competition_box">
-    <compiler angle="radian" meshdir="environment_parts/" convexhull="false"/>
+    <compiler angle="radian" meshdir="environment_parts/"/>
           <!-- Define the assets -->
     <asset>
         <mesh name="box" file="iros_competition_box/assets/box_v4.obj" />

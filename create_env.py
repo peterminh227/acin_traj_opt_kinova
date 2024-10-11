@@ -50,26 +50,30 @@ class Environment_presets(CustomEnvironment):
 
 
     def generate_iros_env(self):
-        env = CustomEnvironment()
+        #env = CustomEnvironment()
 
         xml_file_table = "environment_parts/TU_table_nice/TU_table_nice.xml"
         model_table = env.get_model_from_xml(xml_file_table)
-        env.add_model_to_arena(model_table, "table", pos=[0, 0, 0], quat=None, is_mocap=False)
+        self.add_model_to_arena(model_table, "table", pos=[0, 0, 0], quat=None, is_mocap=False)
+
+        xml_file_iros_box = "environment_parts/iros_competition_box/iros_competition_box.xml"
+        iros_box = env.get_model_from_xml(xml_file_iros_box)
+        env.add_model_to_site(iros_box, 'tu_tisch_verstellbar/table_mount1')
 
         xml_file_kinova = "environment_parts/kinova3/kinova3.xml"
-        model_kinova = env.get_model_from_xml(xml_file_kinova)
-        env.add_model_to_site(model_kinova, 'tu_tisch_verstellbar/table_mount_kinova')
+        model_kinova = self.get_model_from_xml(xml_file_kinova)
+        self.add_model_to_site(model_kinova, 'tu_tisch_verstellbar/table_mount_kinova')
 
         xml_file_gripper= "environment_parts/UR_gripper/ur_gripper.xml"
-        gripper = env.get_model_from_xml(xml_file_gripper)
-        env.add_model_to_site(gripper, 'tu_tisch_verstellbar/kinova3/gripper_mount')
-
-        return env
+        gripper = self.get_model_from_xml(xml_file_gripper)
+        self.add_model_to_site(gripper, 'tu_tisch_verstellbar/kinova3/gripper_mount')
+        self.display_environment()
+        #return env
 
 
 if __name__ == '__main__':
     env = Environment_presets()
-    env.generate_Tesla()
+    env.generate_iros_env()
     # Compile model
     env.compile_model()
     #env.save_preset('robothub')
